@@ -1,0 +1,4 @@
+java -cp sqlite-jdbc-3.40.1.0.jar RecordTester.java sqlite "test.sqlite" FOO "CHAR(99)" 50000 15 false
+
+Ian Chavez
+Brandon Ong

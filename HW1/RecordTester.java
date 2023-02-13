@@ -26,6 +26,7 @@ public class RecordTester{
       num_rows = Integer.parseInt(args[4]);
       num_columns = Integer.parseInt(args[5]);
       StringBuilder addRowSB = new StringBuilder();
+      StringBuilder tableSB = new StringBuilder();
 
       try{
         Connection connection = null;
@@ -55,20 +56,17 @@ public class RecordTester{
         statement.executeUpdate(dropTable);
         System.out.println("dropped table if exist");
         
-        //create table CANT CREATE EMPTY TABLE W NO COLS, MUST FIX
+        //create table
         System.out.println("attempting creating table");
-        String createTable = "CREATE TABLE " + table_name + ";";
+        for(int i=1; i<num_columns; i++){
+          tableSB.append(",`" + i + "` " + type + " NOT NULL");
+        }
+        tableSB.append(");");
+        String createTable = "CREATE TABLE " + table_name + "(`0` " + type + " NOT NULL " + tableSB.toString();
+        System.out.println(createTable);
         statement.executeUpdate(createTable);
         System.out.println("created table");
-        
-        //add cols, named by i
-        String addCol = ""; 
-        for(int i=0; i<num_columns; i++){
-          addCol = "ALTER TABLE "+ i + " " + type + ";";
-          statement.executeUpdate(addCol);
-        }
-        System.out.println("added cols");
-        
+
         //if index then set to have index related to first col (0)
         if(args[6].equals("TRUE")){
           String addIndex = "ALTER TABLE " + table_name +" ADD UNIQUE INDEX index_name 0" + ";";

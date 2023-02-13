@@ -1,100 +1,85 @@
 import java.sql.*;
+import java.util.Random;
 
 public class RecordTester{
+    public static void main(String[] args) {
+      
+      RecordTester rt = new RecordTester();
+      String dbms = args[0];
+      String db = args[1];
+      String table_name = args[2];
+      String type = args[3];
+      int num_rows = Integer.parseInt(args[4]);
+      int num_columns = Integer.parseInt(args[5]);
+      String index = "";
+      StringBuilder addRowSB = new StringBuilder();
 
-    public public static void main(String[] args) {
+      try{
+        //load JDBC driver
+        Class.forName("org.sqlite.JDBC");
         
-        try{
-            //load JDBC driver
-            Class.forName("org.sqlite.JDBC");
-            //db connection
-            Connection connection = DriverManager.getConnection("jdbc:sqlite:dbms.db");
-            //sql statement
-            Statement statement = connection.createStatement();
-            //5th arg = num_rows
-            int numRows = Integer.parseInt(args[4]);
-            //6th arg = num_cols
-            int numCols = Integer.parseInt(args[5]);
-            //index for 1st col
-            String index = "";
-            if(args[6].equals("TRUE")){
-                index="PRIMARY KEY";
-            }
+        //db connection
+        Connection connection = DriverManager.getConnection("jdbc:sqlite:dbms.db");
+        
+        //sql statement used for all sql commands
+        Statement statement = connection.createStatement();
+        
+        //drop table if already exists
+        String dropTable = "DROP TABLE IF EXISTS " + table_name;
+        statement.executeUpdate(dropTable);
 
-            StringBuilder createTable = new StringBuilder();
+        //create table
+        String createTable = "CREATE TABLE " + table_name;
+        statement.executeUpdate(createTable);
 
-            createTable.append("CREATE TABLE "+args[2]+)
+        //add cols, named by i
+        String addCol = ""; 
+        for(int i=0; i<num_columns; i++){
+          addCol = "ALTER TABLE "+ i + " " + type;
+          statement.executeUpdate(addCol);
+        }
 
+        //if index then set to have index related to first col (0)
+        if(args[6].equals("TRUE")){
+          String addIndex = "ALTER TABLE " + table_name +" ADD UNIQUE INDEX index_name 0";
+          statement.executeUpdate(addIndex);
+        }
+
+        //add rows, randomly generated vals using helper function
+        String addRow = ""; 
+        String temp = "";
+        for(int i=0; i<num_rows; i++){
+          addRow = "INSERT INTO "+ table_name + " " + i;
+          addRowSB.append(addRow);
+          for(int j=0; j<num_columns; j++){
+            temp = " " + rt.randomRun(type);
+            addRowSB.append(temp);
+          }
+          addRow=addRowSB.toString();
+          statement.executeUpdate(addRow);
+        }
+
+        
 
         } catch(Exception e){
 
+        }        
+    }
+
+    private String randomRun(String type){
+      StringBuilder sb = new StringBuilder();
+      Random random = new Random();
+    
+      if(type.charAt(0)=='T'){
+        int len = random.nextInt(100) + 1;
+        for (int i = 0; i < len; i++) {
+          sb.append(random.nextInt(2));
         }
-
+      }else{
+        for(int i=0; i<99; i++){
+          sb.append(random.nextInt(2));
+        }
+      }
+      return sb.toString();
     }
-
-}
-
-import java.sql.*;
-
-public class RecordTester {
-  public static void main(String[] args) {
-    String dbms = args[0];
-    String db = args[1];
-    String table_name = args[2];
-    String type = args[3];
-    int num_rows = Integer.parseInt(args[4]);
-    int num_columns = Integer.parseInt(args[5]);
-    String index_no_index = args[6];
-    
-    Connection connection = null;
-    Statement statement = null;
-    
-    try {
-      // Load the SQLite driver
-      Class.forName("org.sqlite.JDBC");
-      // Connect to the database
-      connection = DriverManager.getConnection("jdbc:sqlite:" + db);
-      // Create a statement object
-      statement = connection.createStatement();
-      // Drop the table if it already exists
-      String dropTableSQL = "DROP TABLE IF EXISTS " + table_name;
-      statement.executeUpdate(dropTableSQL);
-      // Create the table
-      String createTableSQL = "CREATE TABLE " + table_name + " (...)";
-      statement.executeUpdate(createTableSQL);
-      // Insert data into the table
-      for (int i = 0; i < num_rows; i++) {
-        String insertSQL = "INSERT INTO " + table_name + " VALUES (...)";
-        statement.executeUpdate(insertSQL);
-      }
-      // Add an index or not
-      if (index_no_index.equals("index")) {
-        String createIndexSQL = "CREATE INDEX " + table_name + "_index ON " + table_name + "(...)";
-        statement.executeUpdate(createIndexSQL);
-      }
-      // Commit the transaction
-      connection.commit();
-    } catch (Exception e) {
-      // Rollback the transaction on error
-      try {
-        connection.rollback();
-      } catch (SQLException sqle) {
-        System.err.println("Error rolling back the transaction");
-        sqle.printStackTrace();
-      }
-      // Print the error message
-      System.err.println("Error creating the table");
-      e.printStackTrace();
-    } finally {
-      // Close the statement and connection
-      try {
-        statement.close();
-      } catch (Exception e) {
-      }
-      try {
-        connection.close();
-      } catch (Exception e) {
-      }
-    }
-  }
 }

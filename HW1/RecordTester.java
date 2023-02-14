@@ -77,17 +77,20 @@ public class RecordTester{
         //add rows, randomly generated vals using helper function
         String addRow = ""; 
         String temp = "";
+        System.out.println("attempting inserting");
         for(int i=0; i<num_rows; i++){
-          addRow = "INSERT INTO "+ table_name + " " + i + ";";
+          addRow = "INSERT INTO "+ table_name + " VALUES (" + randomRun(type);
           addRowSB.append(addRow);
-          for(int j=0; j<num_columns; j++){
-            temp = " " + randomRun(type);
+          for(int j=1; j<num_columns; j++){
+            temp = ", " + randomRun(type);
             addRowSB.append(temp);
           }
+          addRowSB.append(");");
           addRow=addRowSB.toString();
+          //System.out.println(addRow);
           statement.executeUpdate(addRow);
         }
-        System.out.println("added rows");
+        System.out.println("insert complete");
         
         } catch(Exception e){
           System.out.println("Exception " + e);

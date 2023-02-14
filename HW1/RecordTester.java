@@ -2,10 +2,10 @@ import java.sql.*;
 import java.util.Random;
 
 public class RecordTester{
-  private static final String MYSQL_DB_URL = "";
+  private static final String MYSQL_DB_URL = "jdbc:mysql://localhost:3306/";
   private static final String SQLITE_DB_URL = "jdbc:sqlite:./";
   private static final String USERNAME = "root";
-  private static final String PASSWORD = "1234";
+  private static final String PASSWORD = "MySQLAdmin";
 
   public String dbms;
   public String db;
@@ -40,17 +40,18 @@ public class RecordTester{
         }
 
         //load JDBC driver
-        Class.forName("org.sqlite.JDBC");
+        if(type.equals("sqlite")){
+          Class.forName("org.sqlite.JDBC");
+        }
+        else if(type.equals("mysql")){
+          Class.forName("com.mysql.jdbc.Driver");
+        }
         System.out.println("loaded JDBC driver");
 
-        //db connection
-        //Connection connection = DriverManager.getConnection("jdbc:sqlite:C:/Users/Mom/Desktop/cs166/CS157B/HW1/test.sql");
-        //System.out.println("db connection");
-        
         //sql statement used for all sql commands
         Statement statement = connection.createStatement();
         System.out.println("created statement");
-        
+
         //drop table if already exists
         String dropTable = "DROP TABLE IF EXISTS " + table_name + ";";
         statement.executeUpdate(dropTable);
@@ -63,7 +64,7 @@ public class RecordTester{
         }
         tableSB.append(");");
         String createTable = "CREATE TABLE " + table_name + "(`0` " + type + " NOT NULL " + tableSB.toString();
-        System.out.println(createTable);
+        //System.out.println(createTable);
         statement.executeUpdate(createTable);
         System.out.println("created table");
 
@@ -80,6 +81,7 @@ public class RecordTester{
         System.out.println("attempting inserting");
         for(int i=0; i<num_rows; i++){
           addRow = "INSERT INTO "+ table_name + " VALUES (" + randomRun(type);
+          //System.out.println(addRow);
           addRowSB.append(addRow);
           for(int j=1; j<num_columns; j++){
             temp = ", " + randomRun(type);
@@ -91,34 +93,49 @@ public class RecordTester{
           statement.executeUpdate(addRow);
         }
         System.out.println("insert complete");
-        
-        } catch(Exception e){
+        } 
+        catch(Exception e){
           System.out.println("Exception " + e);
         }
   }
 
   private Connection connectToDB(int dbType){
     Connection connection = null;
+    //sqlite
     if(dbType==0){
       try{
         connection = DriverManager.getConnection(SQLITE_DB_URL + db);
         System.out.println("Connected to SQLite DB");
-      }catch(SQLException e){
+      }
+      catch(SQLException e){
         System.out.println(e);
       }
-    }else if(dbType==1){
+    }
+    //mysql
+    else if(dbType==1){
       try{
         connection = DriverManager.getConnection(MYSQL_DB_URL, USERNAME, PASSWORD);
         System.out.println("Connected to SQLite DB");
-      }catch(SQLException e){
+
+        Statement statement = connection.createStatement();
+
+        statement.executeUpdate("DROP DATABASE IF EXISTS homework1");
+
+        statement.executeUpdate("CREATE DATABASE homework1");
+        System.out.println("Database created successfully");
+
+        statement.executeUpdate("USE homework1");
+        System.out.println("Selected database successfully");
+      }
+      catch(SQLException e){
         System.out.println(e);
       }
-    }else{
+    }
+    else{
       System.out.println("Error connection to DB, must be MySQL or SQLite");
     }
     return connection;
   }
-
 
   private String randomRun(String type){
     StringBuilder sb = new StringBuilder();
@@ -128,11 +145,13 @@ public class RecordTester{
       for (int i = 0; i < len; i++) {
         sb.append(random.nextInt(2));
       }
-      }else{
-        for(int i=0; i<99; i++){
-          sb.append(random.nextInt(2));
-        }
+    }
+    else{
+      for(int i=0; i<99; i++){
+        sb.append(random.nextInt(2));
       }
-      return sb.toString();
+    }
+    //System.out.println(sb.toString());
+    return sb.toString();
     }
 }

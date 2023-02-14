@@ -88,8 +88,8 @@ public class RecordTester{
             addRowSB.append(temp);
           }
           addRowSB.append(");");
-          addRow=addRowSB.toString();
-          //System.out.println(addRow);
+          addRow = addRowSB.toString();
+          System.out.println(addRow);
           statement.executeUpdate(addRow);
         }
         System.out.println("insert complete");
